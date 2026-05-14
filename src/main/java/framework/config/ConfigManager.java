@@ -1,61 +1,55 @@
 package framework.config;
 
-import framework.enums.BrowserType;
-
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
+import framework.enums.BrowserType;
 
-public final class ConfigManager {
-    private static final BrowserConfig CONFIG = new BrowserConfig();
-    private static final String PROPERTIES_PATH = "/config/application.properties";
+/**
+ * Single Source of Truth cho toàn bộ cấu hình của Framework.
+ * Đọc cấu hình từ application.properties và cho phép ghi đè bằng System.getProperty (từ CI/Maven).
+ */
+public class ConfigManager {
+    private static final Properties properties = new Properties();
 
     static {
-        loadDefaults();
-        applySystemOverrides();
+        try (InputStream input = ConfigManager.class.getClassLoader().getResourceAsStream("config/application.properties")) {
+            if (input != null) {
+                properties.load(input);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Không thể đọc file cấu hình application.properties", e);
+        }
     }
 
-    private ConfigManager() {
+    public static String getProperty(String key, String defaultValue) {
+        // System property (Maven/CI) luôn có độ ưu tiên cao nhất
+        String sysProp = System.getProperty(key);
+        if (sysProp != null && !sysProp.trim().isEmpty()) {
+            return sysProp;
+        }
+        return properties.getProperty(key, defaultValue);
     }
+
+    // --- Các hàm tiện ích lấy cấu hình cụ thể ---
+    public static String getBrowser() { return getProperty("browser", "CHROME"); }
+    public static boolean isHeadless() { return Boolean.parseBoolean(getProperty("headless", "false")); }
+    public static boolean isRemote() { return Boolean.parseBoolean(getProperty("remote", "false")); }
+    public static String getRemoteUrl() { return getProperty("remoteUrl", "http://localhost:4444/wd/hub"); }
+    
+    public static String getBaseUrl() { return getProperty("env.url", "https://example.com"); }
+    public static String getBaseApiUrl() { return getProperty("env.api.url", "https://api.example.com/v1"); }
+    public static int getWaitTimeout() { return Integer.parseInt(getProperty("wait.timeout", "15")); }
 
     public static BrowserConfig getBrowserConfig() {
-        return CONFIG;
-    }
-
-    private static void loadDefaults() {
-        try (InputStream stream = ConfigManager.class.getResourceAsStream(PROPERTIES_PATH)) {
-            if (stream != null) {
-                Properties properties = new Properties();
-                properties.load(stream);
-                CONFIG.setBrowser(BrowserType.valueOf(properties.getProperty("browser", CONFIG.getBrowser().name()).toUpperCase()));
-                CONFIG.setHeadless(Boolean.parseBoolean(properties.getProperty("headless", String.valueOf(CONFIG.isHeadless()))));
-                CONFIG.setRemote(Boolean.parseBoolean(properties.getProperty("remote", String.valueOf(CONFIG.isRemote()))));
-                CONFIG.setRemoteUrl(properties.getProperty("remoteUrl", CONFIG.getRemoteUrl()));
-            }
-        } catch (IOException e) {
-            throw new IllegalStateException("Unable to load application properties", e);
+        BrowserConfig config = new BrowserConfig();
+        try {
+            config.setBrowser(BrowserType.valueOf(getBrowser().toUpperCase()));
+        } catch (IllegalArgumentException e) {
+            config.setBrowser(BrowserType.CHROME); // Mặc định là CHROME nếu truyền sai tên
         }
-    }
-
-    private static void applySystemOverrides() {
-        String browser = System.getProperty("browser");
-        if (browser != null && !browser.isBlank()) {
-            CONFIG.setBrowser(BrowserType.valueOf(browser.toUpperCase()));
-        }
-
-        String headless = System.getProperty("headless");
-        if (headless != null) {
-            CONFIG.setHeadless(Boolean.parseBoolean(headless));
-        }
-
-        String remote = System.getProperty("remote");
-        if (remote != null) {
-            CONFIG.setRemote(Boolean.parseBoolean(remote));
-        }
-
-        String remoteUrl = System.getProperty("remoteUrl");
-        if (remoteUrl != null && !remoteUrl.isBlank()) {
-            CONFIG.setRemoteUrl(remoteUrl);
-        }
+        config.setHeadless(isHeadless());
+        config.setRemote(isRemote());
+        config.setRemoteUrl(getRemoteUrl());
+        return config;
     }
 }

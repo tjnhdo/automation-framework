@@ -1,7 +1,7 @@
 package framework.pages.login;
 
 import framework.base.BasePage;
-import framework.config.EnvironmentConfig;
+import framework.config.ConfigManager;
 import org.openqa.selenium.By;
 
 public class LoginPage extends BasePage {
@@ -13,7 +13,7 @@ public class LoginPage extends BasePage {
 
     // 2. Hàm mở trang Login
     public LoginPage open() {
-        open(EnvironmentConfig.getBaseUrl() + "/login");
+        open(ConfigManager.getBaseUrl() + "/login");
         return this;
     }
 

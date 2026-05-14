@@ -1,57 +1,62 @@
 package framework.sync;
 
+import framework.config.ConfigManager;
+import framework.driver.DriverManager;
 import org.openqa.selenium.By;
-import org.openqa.selenium.ElementClickInterceptedException;
-import org.openqa.selenium.StaleElementReferenceException;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.FluentWait;
-import org.openqa.selenium.support.ui.Wait;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.Duration;
-import java.util.List;
 import java.util.function.Function;
 
-public final class WaitManager {
-    private static final Duration DEFAULT_TIMEOUT = Duration.ofSeconds(getTimeoutSafely());
-    private static final Duration POLLING_INTERVAL = Duration.ofMillis(300);
+public class WaitManager {
 
-    private WaitManager() {
+    private static WebDriverWait getWait(WebDriver driver) {
+        return new WebDriverWait(driver, Duration.ofSeconds(ConfigManager.getWaitTimeout()));
     }
 
-    private static int getTimeoutSafely() {
-        try {
-            return Integer.parseInt(System.getProperty("WAIT_TIMEOUT", "15"));
-        } catch (NumberFormatException e) {
-            System.err.println("WARNING: Invalid WAIT_TIMEOUT format. Defaulting to 15 seconds.");
-            return 15;
-        }
+    /**
+     * Chờ đợi linh hoạt dựa trên một function/điều kiện tuỳ chỉnh.
+     * Tương thích với các khối lambda từ BasePage.
+     */
+    public static <T> T waitFor(WebDriver driver, Function<WebDriver, T> condition) {
+        return getWait(driver).until(condition);
     }
 
-    public static WebElement waitForVisible(WebDriver driver, By locator) {
-        return createWait(driver).until(ExpectedConditions.visibilityOfElementLocated(locator));
-    }
-
+    /**
+     * Chờ cho đến khi element hiển thị và có thể click.
+     */
     public static WebElement waitForClickable(WebDriver driver, By locator) {
-        return createWait(driver).until(ExpectedConditions.elementToBeClickable(locator));
+        return getWait(driver).until(ExpectedConditions.elementToBeClickable(locator));
     }
 
-    public static boolean waitForInvisibility(WebDriver driver, By locator) {
-        return createWait(driver).until(ExpectedConditions.invisibilityOfElementLocated(locator));
+    /**
+     * Chờ cho đến khi element xuất hiện trên DOM và hiển thị (visible).
+     */
+    public static WebElement waitForVisible(WebDriver driver, By locator) {
+        return getWait(driver).until(ExpectedConditions.visibilityOfElementLocated(locator));
     }
 
-    public static <T> T waitFor(WebDriver driver, Function<? super WebDriver, T> condition) {
-        return createWait(driver).until(condition);
+    /**
+     * Chờ cho đến khi element biến mất khỏi DOM hoặc bị ẩn đi (invisible).
+     */
+    public static Boolean waitForInvisibility(WebDriver driver, By locator) {
+        return getWait(driver).until(ExpectedConditions.invisibilityOfElementLocated(locator));
     }
 
-    private static Wait<WebDriver> createWait(WebDriver driver) {
-        return new FluentWait<>(driver)
-                .withTimeout(DEFAULT_TIMEOUT)
-                .pollingEvery(POLLING_INTERVAL)
-                .ignoring(ElementClickInterceptedException.class)
-                .ignoring(StaleElementReferenceException.class)
-                .ignoring(org.openqa.selenium.NoSuchElementException.class);
+    /**
+     * Đảm bảo trình duyệt đã load xong toàn bộ DOM và JavaScript.
+     * Rất hữu ích cho các trang web kiểu cũ hoặc sau khi redirect.
+     */
+    public static void waitForPageLoad() {
+        WebDriver driver = DriverManager.getDriver();
+        ExpectedCondition<Boolean> pageLoadCondition = d -> 
+                ((JavascriptExecutor) d).executeScript("return document.readyState").equals("complete");
+        
+        getWait(driver).until(pageLoadCondition);
     }
 }

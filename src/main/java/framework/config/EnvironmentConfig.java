@@ -1,11 +1,24 @@
 package framework.config;
 
-public final class EnvironmentConfig {
+/**
+ * @deprecated Hãy sử dụng {@link ConfigManager} thay thế để đảm bảo Single Source of Truth.
+ */
+@Deprecated
+public class EnvironmentConfig {
     
-    private EnvironmentConfig() {
+    public static String getBaseUrl() {
+        return ConfigManager.getBaseUrl();
     }
 
-    public static String getBaseUrl() {
-        return System.getProperty("BASE_URL", "https://example.com");
+    public static String getBaseApiUrl() {
+        return ConfigManager.getBaseApiUrl();
+    }
+
+    public static boolean isHeadless() {
+        return ConfigManager.isHeadless();
+    }
+    
+    public static int getWaitTimeout() {
+        return ConfigManager.getWaitTimeout();
     }
 }
