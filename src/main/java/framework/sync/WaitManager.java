@@ -15,10 +15,19 @@ import java.util.List;
 import java.util.function.Function;
 
 public final class WaitManager {
-    private static final Duration DEFAULT_TIMEOUT = Duration.ofSeconds(Integer.parseInt(System.getProperty("WAIT_TIMEOUT", "15")));
+    private static final Duration DEFAULT_TIMEOUT = Duration.ofSeconds(getTimeoutSafely());
     private static final Duration POLLING_INTERVAL = Duration.ofMillis(300);
 
     private WaitManager() {
+    }
+
+    private static int getTimeoutSafely() {
+        try {
+            return Integer.parseInt(System.getProperty("WAIT_TIMEOUT", "15"));
+        } catch (NumberFormatException e) {
+            System.err.println("WARNING: Invalid WAIT_TIMEOUT format. Defaulting to 15 seconds.");
+            return 15;
+        }
     }
 
     public static WebElement waitForVisible(WebDriver driver, By locator) {
