@@ -27,7 +27,7 @@ jobs:
 
     - name: Generate Allure Report
       if: always()
-      run: mvn allure:report
+      run: mvn io.qameta.allure:allure-maven:2.12.0:report
 
     - name: Upload Allure Report Artifact
       if: always()
