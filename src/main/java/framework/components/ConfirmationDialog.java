@@ -1,34 +1,42 @@
 package framework.components;
 
+import framework.driver.DriverManager;
 import framework.sync.WaitManager;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 
 public class ConfirmationDialog {
-    private final WebDriver driver;
     private final By dialogLocator;
     private final By confirmButton;
     private final By cancelButton;
 
-    public ConfirmationDialog(WebDriver driver, By dialogLocator, By confirmButton, By cancelButton) {
-        this.driver = driver;
+    public ConfirmationDialog(By dialogLocator, By confirmButton, By cancelButton) {
         this.dialogLocator = dialogLocator;
         this.confirmButton = confirmButton;
         this.cancelButton = cancelButton;
     }
 
+    private WebDriver getDriver() {
+        return DriverManager.getDriver();
+    }
+
     public void confirm() {
-        WaitManager.waitForClickable(driver, confirmButton).click();
-        WaitManager.waitForInvisibility(driver, dialogLocator);
+        WaitManager.waitFor(getDriver(), d -> {
+            WaitManager.waitForClickable(d, confirmButton).click();
+            return true;
+        });
+        WaitManager.waitForInvisibility(getDriver(), dialogLocator);
     }
 
     public void cancel() {
-        WaitManager.waitForClickable(driver, cancelButton).click();
-        WaitManager.waitForInvisibility(driver, dialogLocator);
+        WaitManager.waitFor(getDriver(), d -> {
+            WaitManager.waitForClickable(d, cancelButton).click();
+            return true;
+        });
+        WaitManager.waitForInvisibility(getDriver(), dialogLocator);
     }
 
     public boolean isDisplayed() {
-        return WaitManager.waitForVisible(driver, dialogLocator).isDisplayed();
+        return WaitManager.waitForVisible(getDriver(), dialogLocator).isDisplayed();
     }
 }
-

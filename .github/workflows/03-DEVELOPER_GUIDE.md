@@ -39,24 +39,22 @@ public class LoginTest extends BaseUiTest {
 ```
 
 ### 3. How to Write a Data-Driven Test (DDT)
-**Rule:** Use TestNG `@DataProvider` to pass multiple sets of data into a single test method. Do not use loops inside the test method for different data sets.
+**Rule:** Use TestNG `@DataProvider` combined with `JsonDataReader` to map JSON files to POJO models. Do not use hardcoded arrays or loops inside the test method.
 
 ```java
 public class LoginDdtTest extends BaseUiTest {
     @DataProvider(name = "invalidLoginData")
     public Object[][] getInvalidLoginData() {
-        return new Object[][] {
-            {"wrong@email.com", "12345", "Invalid credentials"},
-            {"", "password", "Email is required"},
-            {"user@domain.com", "", "Password is required"}
-        };
+        // Automatically reads JSON and maps to LoginData POJO
+        return JsonDataReader.readData("loginData.json", LoginData.class);
     }
 
     @Test(dataProvider = "invalidLoginData")
-    public void testInvalidLogin(String email, String password, String expectedErrorMessage) {
+    // The test only receives a single, clean POJO parameter
+    public void testInvalidLogin(LoginData data) {
         LoginPage loginPage = new LoginPage().open();
-        loginPage.login(email, password);
-        UiAssertions.assertTextEquals(loginPage.getErrorMessage(), expectedErrorMessage, "Error message should match");
+        loginPage.login(data.getEmail(), data.getPassword());
+        UiAssertions.assertTextEquals(loginPage.getErrorMessage(), data.getExpectedErrorMessage(), "Error message should match");
     }
 }
 ```

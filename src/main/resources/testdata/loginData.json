@@ -1,0 +1,17 @@
+[
+  {
+    "email": "invalid1@example.com",
+    "password": "wrongpassword1",
+    "expectedErrorMessage": "Invalid email or password"
+  },
+  {
+    "email": "invalid2@example.com",
+    "password": "wrongpassword2",
+    "expectedErrorMessage": "Invalid email or password"
+  },
+  {
+    "email": "empty_password@example.com",
+    "password": "",
+    "expectedErrorMessage": "Password is required"
+  }
+]

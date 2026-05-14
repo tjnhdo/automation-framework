@@ -18,20 +18,23 @@ public class Dropdown {
         return DriverManager.getDriver();
     }
 
-    private Select getSelect() {
-        WebElement element = WaitManager.waitForVisible(getDriver(), locator);
-        return new Select(element);
-    }
-
     public void selectByVisibleText(String label) {
-        getSelect().selectByVisibleText(label);
+        WaitManager.waitFor(getDriver(), d -> {
+            new Select(WaitManager.waitForVisible(d, locator)).selectByVisibleText(label);
+            return true;
+        });
     }
 
     public void selectByValue(String value) {
-        getSelect().selectByValue(value);
+        WaitManager.waitFor(getDriver(), d -> {
+            new Select(WaitManager.waitForVisible(d, locator)).selectByValue(value);
+            return true;
+        });
     }
 
     public String getSelectedOption() {
-        return getSelect().getFirstSelectedOption().getText();
+        return WaitManager.waitFor(getDriver(), d -> {
+            return new Select(WaitManager.waitForVisible(d, locator)).getFirstSelectedOption().getText();
+        });
     }
 }

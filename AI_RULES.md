@@ -3,6 +3,10 @@
 **IMPORTANT**: Any AI coding assistant MUST read, understand, and strictly follow these rules before making any code changes, suggestions, or refactoring in this project.
 **ALL AI RESPONSES AND EXPLANATIONS MUST BE IN VIETNAMESE (TIẾNG VIỆT).**
 
+> **🇻🇳 Dành cho Lập trình viên (For Human Developers):**
+> File này được thiết kế tối ưu hóa bằng Tiếng Anh để làm "System Prompt" cho các công cụ AI. 
+> Để đọc hiểu các quy tắc cốt lõi của Framework bằng Tiếng Việt một cách chi tiết kèm ví dụ thực tế, vui lòng xem tài liệu tại thư mục `docs/` (đặc biệt là `01-ARCHITECTURE.md` và `02-CODING_STANDARDS.md`).
+
 ## 1. Framework Philosophy
 - Prefer stability over clever abstractions.
 - Prefer explicit behavior over magic.

@@ -21,11 +21,17 @@ public class PaginationComponent {
     }
 
     public void goNext() {
-        WaitManager.waitForClickable(getDriver(), nextButton).click();
+        WaitManager.waitFor(getDriver(), d -> {
+            WaitManager.waitForClickable(d, nextButton).click();
+            return true;
+        });
     }
 
     public void goPrevious() {
-        WaitManager.waitForClickable(getDriver(), previousButton).click();
+        WaitManager.waitFor(getDriver(), d -> {
+            WaitManager.waitForClickable(d, previousButton).click();
+            return true;
+        });
     }
 
     public boolean isDisplayed() {

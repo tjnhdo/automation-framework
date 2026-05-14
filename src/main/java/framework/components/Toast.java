@@ -17,7 +17,9 @@ public class Toast {
     }
 
     public String getMessage() {
-        return WaitManager.waitForVisible(getDriver(), locator).getText();
+        return WaitManager.waitFor(getDriver(), d -> {
+            return WaitManager.waitForVisible(d, locator).getText();
+        });
     }
 
     public boolean isDisplayed() {

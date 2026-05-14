@@ -47,4 +47,9 @@ public class TestListener implements ITestListener {
             System.err.println("Failed to capture diagnostics on test failure: " + e.getMessage());
         }
     }
+
+    @Override
+    public void onFinish(ITestContext context) {
+        AllureManager.generateEnvironmentProperties();
+    }
 }
