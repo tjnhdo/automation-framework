@@ -1,0 +1,17 @@
+# Maven
+target/
+
+# IDEs
+.idea/
+*.iml
+.vscode/
+
+# Test Reports & Logs
+allure-results/
+reports/
+logs/
+*.log
+
+# OS generated files
+.DS_Store
+Thumbs.db
